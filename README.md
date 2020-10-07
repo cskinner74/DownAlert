@@ -1,5 +1,5 @@
 # DownAlert
-Python3 script to check status of a URL using Twilio for SMS alerting.
+Python3 script to check status of a URL, triggering a Slack alert if site is unresponsive or down.
 
 ## Setup
 Requires Python3.7+
