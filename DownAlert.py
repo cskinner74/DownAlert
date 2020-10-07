@@ -1,10 +1,8 @@
 #!/usr/bin/python3
 
 # Python script to report status of a URL
-# Sends SMS alert if the request returns anything other than 200
+# Sends Slack alert if the request returns anything other than 200
 # Or is unreachable
-
-# Note: must create account with Twilio to get the account_sid and auth_token
 
 import requests
 import sys
