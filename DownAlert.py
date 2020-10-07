@@ -9,22 +9,26 @@
 import requests
 import sys
 import argparse
-from twilio.rest import Client
+import configparser
+import json
 
-#SMS setup
-account_sid="*"
-auth_token="*"
-toNum="*"
-fromnum="*"
-client = Client(account_sid, auth_token)
-
-#Parser section
+#Argument parsing
 parser = argparse.ArgumentParser(description="Checks uptime for specified URL")
 parser.add_argument("url", help="URL to check")
 parser.add_argument("-v", "--verbose", help="Verbose", action="store_true")
 args = parser.parse_args()
 
-#Check URL
+#Config parsing
+config = configparser.ConfigParser()
+config.read('config.ini')
+webhook = config.get('Main', 'webhook')
+
+#Check URL format
+if not args.url.startswith('http'):
+    print("Please provide schema: http:// or https://")
+    exit(1)
+
+#Check URL status
 if(args.verbose):
     print("Checking URL")
 try:
@@ -46,8 +50,12 @@ try:
 except requests.ConnectionError:
     if(args.verbose):
         print("Failed to connect, check URL for errors")
-    message = client.messages.create(
-            to=toNum,
-            from_=fromNum,
-            body="URGENT ALERT! Cannot connect to "+args.url+"!")
+    slack_data = 'URGENT ALERT! Cannot connect to: ' + args.url
+    slack_response = requests.post(
+            webhook, data=json.dumps({'text': slack_data}),
+            headers={'Content-Type': 'application/json'})
+    if slack_response.status_code is not 200:
+        raise ValueError(
+                'Request to slack returned an error %s, the response is:\n%s'
+                % (slack_response.status_code, slack_response.text))
 
